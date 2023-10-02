@@ -1,0 +1,33 @@
+name: Docker Build and Lint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build_and_run:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Build Docker Image
+      run: docker build -t stock-cli .
+      
+    - name: Run Docker Container
+      run: docker run --name stock-cli-container -d stock-cli sleep infinity # Keep the container running
+      
+    - name: Lint Dockerfile with Hadolint
+      uses: hadolint/hadolint-action@v1.6.0
+      with:
+        dockerfile: Dockerfile
+        
+    - name: Stop and Remove Docker Container
+      run: |
+        docker stop stock-cli-container
+        docker rm stock-cli-container
